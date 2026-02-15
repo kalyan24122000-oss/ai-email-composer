@@ -1,0 +1,4 @@
+.env
+reviews.json
+__pycache__/
+*.pyc

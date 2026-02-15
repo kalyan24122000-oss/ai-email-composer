@@ -1,0 +1,2118 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MailSmith.AI — Smart Email Productivity Tool</title>
+    <meta name="description"
+        content="AI-powered email composition tool with smart templates, tone control, and intelligent formatting.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --font: 'Inter', system-ui, -apple-system, sans-serif;
+            --radius: 14px;
+            --radius-sm: 8px;
+            --radius-xs: 6px;
+            --transition: 0.3s cubic-bezier(.4, 0, .2, 1);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.18);
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 40%, #24243e 100%);
+            --surface: rgba(255, 255, 255, 0.06);
+            --surface-hover: rgba(255, 255, 255, 0.1);
+            --surface-active: rgba(255, 255, 255, 0.14);
+            --border: rgba(255, 255, 255, 0.1);
+            --border-focus: rgba(139, 92, 246, 0.5);
+            --text-primary: #f1f1f4;
+            --text-secondary: #a0a0b8;
+            --text-muted: #6b6b80;
+            --accent: #8b5cf6;
+            --accent-hover: #a78bfa;
+            --accent-glow: rgba(139, 92, 246, 0.25);
+            --success: #34d399;
+            --error: #f87171;
+            --warning: #fbbf24;
+            --info: #60a5fa;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --input-bg: rgba(255, 255, 255, 0.07);
+            --toast-bg: rgba(30, 30, 60, 0.95);
+            --glass-blur: 20px;
+            --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+        }
+
+        [data-theme="light"] {
+            --bg-gradient: linear-gradient(135deg, #e8e0f0 0%, #f0e6ff 40%, #f5f0ff 100%);
+            --surface: rgba(255, 255, 255, 0.7);
+            --surface-hover: rgba(255, 255, 255, 0.85);
+            --surface-active: rgba(255, 255, 255, 0.95);
+            --border: rgba(0, 0, 0, 0.1);
+            --border-focus: rgba(139, 92, 246, 0.5);
+            --text-primary: #1a1a2e;
+            --text-secondary: #555570;
+            --text-muted: #8888a0;
+            --accent: #7c3aed;
+            --accent-hover: #6d28d9;
+            --accent-glow: rgba(124, 58, 237, 0.2);
+            --success: #059669;
+            --error: #dc2626;
+            --warning: #d97706;
+            --info: #2563eb;
+            --card-bg: rgba(255, 255, 255, 0.65);
+            --input-bg: rgba(255, 255, 255, 0.8);
+            --toast-bg: rgba(255, 255, 255, 0.95);
+            --glass-blur: 24px;
+            --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+        }
+
+        html {
+            font-size: 15px;
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: var(--font);
+            color: var(--text-primary);
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            transition: background var(--transition), color var(--transition);
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 3px
+        }
+
+        /* HEADER */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            background: var(--surface);
+            backdrop-filter: blur(var(--glass-blur));
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .app-logo svg {
+            width: 28px;
+            height: 28px;
+            color: var(--accent)
+        }
+
+        .app-logo h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.3px
+        }
+
+        .app-logo span {
+            color: var(--accent)
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .icon-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .icon-btn:hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+            border-color: var(--border-focus)
+        }
+
+        .icon-btn svg {
+            width: 18px;
+            height: 18px
+        }
+
+        /* MAIN LAYOUT */
+        .app-main {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 24px;
+            padding: 24px 32px;
+            max-width: 1440px;
+            margin: 0 auto;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* CARDS / GLASS */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: all var(--transition);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(139, 92, 246, 0.2)
+        }
+
+        .card-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title svg {
+            width: 16px;
+            height: 16px;
+            color: var(--accent)
+        }
+
+        /* FORM CONTROLS */
+        .form-group {
+            margin-bottom: 16px
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: var(--radius-xs);
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-family: var(--font);
+            font-size: 0.88rem;
+            transition: all var(--transition);
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow)
+        }
+
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238888a0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+            line-height: 1.5
+        }
+
+        /* PILLS */
+        .pill-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px
+        }
+
+        .pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .pill:hover {
+            border-color: var(--accent);
+            color: var(--accent)
+        }
+
+        .pill.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent)
+        }
+
+        /* PRIMARY BUTTON */
+        .btn-generate {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent), #6d28d9);
+            color: #fff;
+            font-family: var(--font);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 24px;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px var(--accent-glow)
+        }
+
+        .btn-generate:active {
+            transform: translateY(0)
+        }
+
+        .btn-generate.loading {
+            pointer-events: none;
+            opacity: 0.85
+        }
+
+        .btn-generate .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: none;
+        }
+
+        .btn-generate.loading .spinner {
+            display: block
+        }
+
+        .btn-generate.loading .btn-text {
+            display: none
+        }
+
+        /* RIPPLE */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple-anim 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-anim {
+            to {
+                transform: scale(4);
+                opacity: 0
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        /* EMAIL PREVIEW */
+        .preview-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px
+        }
+
+        .email-preview-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column
+        }
+
+        .email-header-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .email-header-bar .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%
+        }
+
+        .dot-r {
+            background: #f87171
+        }
+
+        .dot-y {
+            background: #fbbf24
+        }
+
+        .dot-g {
+            background: #34d399
+        }
+
+        .subject-input {
+            width: 100%;
+            padding: 10px 0;
+            border: none;
+            background: transparent;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 12px;
+            outline: none;
+            font-family: var(--font);
+            transition: border-color var(--transition);
+        }
+
+        .subject-input:focus {
+            border-color: var(--accent)
+        }
+
+        .subject-input::placeholder {
+            color: var(--text-muted)
+        }
+
+        .email-body {
+            flex: 1;
+            min-height: 250px;
+            padding: 12px;
+            border-radius: var(--radius-xs);
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            font-family: var(--font);
+            font-size: 0.92rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            outline: none;
+            overflow-y: auto;
+            transition: border-color var(--transition);
+            white-space: pre-wrap;
+        }
+
+        .email-body:focus {
+            border-color: var(--accent)
+        }
+
+        .email-body:empty::before {
+            content: attr(data-placeholder);
+            color: var(--text-muted);
+        }
+
+        .cursor-blink {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: var(--accent);
+            animation: blink 0.8s step-end infinite;
+            vertical-align: text-bottom;
+            margin-left: 1px;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0
+            }
+        }
+
+        /* STATS BAR */
+        .stats-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 12px 16px;
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px
+        }
+
+        .stat-item svg {
+            width: 14px;
+            height: 14px;
+            color: var(--accent)
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: var(--text-primary)
+        }
+
+        .confidence-bar {
+            width: 80px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--surface-active);
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            transition: width 0.5s ease;
+            width: 0%
+        }
+
+        /* ENHANCEMENT TOOLBAR */
+        .enhance-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .enhance-btn {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enhance-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--surface-hover)
+        }
+
+        /* ACTION BAR */
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .action-btn {
+            padding: 9px 18px;
+            border-radius: var(--radius-xs);
+            font-size: 0.82rem;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn:hover {
+            background: var(--surface-hover);
+            color: var(--text-primary)
+        }
+
+        .action-btn svg {
+            width: 15px;
+            height: 15px
+        }
+
+        /* TOAST */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .toast {
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            background: var(--toast-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-size: 0.84rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: toast-in 0.35s ease;
+            min-width: 240px;
+        }
+
+        .toast.removing {
+            animation: toast-out 0.3s ease forwards
+        }
+
+        @keyframes toast-in {
+            from {
+                transform: translateX(100%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        @keyframes toast-out {
+            to {
+                transform: translateX(100%);
+                opacity: 0
+            }
+        }
+
+        .toast-icon {
+            font-size: 1rem
+        }
+
+        /* HISTORY MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(6px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fade-in 0.25s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .modal {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 560px;
+            max-height: 70vh;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            animation: modal-in 0.3s ease;
+        }
+
+        @keyframes modal-in {
+            from {
+                transform: scale(0.95) translateY(10px);
+                opacity: 0
+            }
+
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px
+        }
+
+        .modal-header h2 {
+            font-size: 1rem;
+            font-weight: 600
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto
+        }
+
+        .history-item {
+            padding: 12px;
+            border-radius: var(--radius-xs);
+            border: 1px solid var(--border);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .history-item:hover {
+            background: var(--surface-hover);
+            border-color: var(--accent)
+        }
+
+        .history-item h4 {
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 4px
+        }
+
+        .history-item p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.4
+        }
+
+        .history-item .history-meta {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 6px
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 32px;
+            color: var(--text-muted);
+            font-size: 0.88rem
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:900px) {
+            .app-main {
+                grid-template-columns: 1fr;
+                padding: 16px
+            }
+
+            .app-header {
+                padding: 12px 16px
+            }
+        }
+
+        @media(max-width:480px) {
+            .pill-group {
+                gap: 4px
+            }
+
+            .enhance-toolbar {
+                gap: 4px
+            }
+
+            .action-bar {
+                gap: 4px
+            }
+
+            .stats-bar {
+                gap: 8px
+            }
+        }
+
+        /* SPLASH SCREEN */
+        .splash-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #24243e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        .splash-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none
+        }
+
+        .splash-logo {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            animation: pulse-glow 1.5s ease-in-out infinite alternate
+        }
+
+        .splash-title {
+            font-family: var(--font);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #f1f1f4;
+            letter-spacing: -0.3px;
+            margin-bottom: 8px
+        }
+
+        .splash-title span {
+            color: #8b5cf6
+        }
+
+        .splash-credit {
+            font-family: var(--font);
+            font-size: 0.95rem;
+            color: #a0a0b8;
+            margin-bottom: 6px
+        }
+
+        .splash-credit strong {
+            color: #8b5cf6;
+            font-weight: 600
+        }
+
+        .splash-sub {
+            font-family: var(--font);
+            font-size: 0.75rem;
+            color: #6b6b80;
+            letter-spacing: 0.5px
+        }
+
+        @keyframes pulse-glow {
+            from {
+                transform: scale(1);
+                filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.3))
+            }
+
+            to {
+                transform: scale(1.08);
+                filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.6))
+            }
+        }
+
+        /* FORMAT NOTE */
+        .format-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: var(--radius-xs);
+            margin-top: 10px;
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.18);
+            font-size: 0.76rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .format-note svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            color: var(--accent);
+            margin-top: 1px
+        }
+
+        /* REVIEW MODAL (uncancellable) */
+        .review-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fade-in 0.3s ease;
+        }
+
+        .review-overlay.active {
+            display: flex
+        }
+
+        .review-modal {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 440px;
+            padding: 28px;
+            animation: modal-in 0.3s ease;
+        }
+
+        .review-modal h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-align: center
+        }
+
+        .review-modal .review-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 20px
+        }
+
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 18px
+        }
+
+        .star-rating button {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            padding: 0;
+        }
+
+        .star-rating button.active,
+        .star-rating button:hover {
+            color: #fbbf24;
+            transform: scale(1.2)
+        }
+
+        .review-modal .form-group {
+            margin-bottom: 14px
+        }
+
+        .review-modal .form-group label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            display: block
+        }
+
+        .review-modal textarea.form-control {
+            min-height: 70px
+        }
+
+        .btn-submit-review {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, #34d399, #059669);
+            color: #fff;
+            font-family: var(--font);
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            margin-top: 8px;
+        }
+
+        .btn-submit-review:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(52, 211, 153, 0.3)
+        }
+
+        .btn-submit-review:disabled {
+            opacity: 0.6;
+            pointer-events: none
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SPLASH SCREEN -->
+    <div class="splash-overlay" id="splashScreen">
+        <div class="splash-logo">✉️</div>
+        <div class="splash-title"><span>Mail</span>Smith.AI</div>
+        <div class="splash-credit">Made with ❤️ by <strong>Kalyan BURMAN</strong></div>
+        <div class="splash-sub">Loading your smart workspace...</div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="app-header">
+        <div class="app-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+            </svg>
+            <h1><span>Mail</span>Smith.AI</h1>
+        </div>
+        <div class="header-actions">
+            <button class="icon-btn" id="historyBtn" title="Email History">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+            </button>
+            <button class="icon-btn" id="themeBtn" title="Toggle Theme">
+                <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="app-main">
+
+        <!-- LEFT: PROMPT PANEL -->
+        <aside class="glass-card" id="promptPanel">
+            <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon
+                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+                Smart Prompt
+            </div>
+
+            <div class="form-group">
+                <label for="emailPurpose">Email Purpose</label>
+                <select class="form-control" id="emailPurpose">
+                    <option value="business_proposal">Business Proposal</option>
+                    <option value="follow_up">Follow Up</option>
+                    <option value="apology">Apology</option>
+                    <option value="complaint">Complaint</option>
+                    <option value="job_application">Job Application</option>
+                    <option value="meeting_request">Meeting Request</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Tone</label>
+                <div class="pill-group" data-field="tone">
+                    <button class="pill active" data-value="professional">Professional</button>
+                    <button class="pill" data-value="friendly">Friendly</button>
+                    <button class="pill" data-value="assertive">Assertive</button>
+                    <button class="pill" data-value="formal">Formal</button>
+                    <button class="pill" data-value="casual">Casual</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="recipientType">Recipient Type</label>
+                <select class="form-control" id="recipientType">
+                    <option value="client">Client</option>
+                    <option value="manager">Manager</option>
+                    <option value="hr">HR</option>
+                    <option value="team_member">Team Member</option>
+                    <option value="professor">Professor</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Email Length</label>
+                <div class="pill-group" data-field="length">
+                    <button class="pill" data-value="short">Short</button>
+                    <button class="pill active" data-value="medium">Medium</button>
+                    <button class="pill" data-value="detailed">Detailed</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="keyPoints">Key Points</label>
+                <textarea class="form-control" id="keyPoints"
+                    placeholder="Enter the main points you want to cover..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="ctaInput">Call To Action</label>
+                <input class="form-control" id="ctaInput" type="text"
+                    placeholder="e.g. Schedule a meeting, Reply by Friday...">
+            </div>
+
+            <div class="form-group">
+                <label for="signatureStyle">Signature Style</label>
+                <select class="form-control" id="signatureStyle">
+                    <option value="professional">Professional</option>
+                    <option value="minimal">Minimal</option>
+                    <option value="friendly">Friendly</option>
+                    <option value="formal">Formal</option>
+                    <option value="none">None</option>
+                </select>
+            </div>
+
+            <button class="btn-generate" id="generateBtn">
+                <div class="spinner"></div>
+                <span class="btn-text">✨ Generate Email</span>
+            </button>
+        </aside>
+
+        <!-- RIGHT: PREVIEW PANEL -->
+        <section class="preview-panel">
+            <div class="glass-card email-preview-card">
+                <div class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                    Live Preview
+                </div>
+                <div class="email-header-bar">
+                    <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+                </div>
+                <input class="subject-input" id="subjectInput" type="text"
+                    placeholder="Subject line will appear here...">
+                <div class="email-body" id="emailBody" contenteditable="true"
+                    data-placeholder="Your AI-generated email will appear here. Fill in the prompt and click Generate...">
+                </div>
+                <div class="format-note">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                    <span><strong>Note:</strong> Replace placeholders like <em>[Your Name]</em>, <em>[Manager]</em>,
+                        <em>[Company]</em>, <em>[Title]</em>, <em>[Position]</em>, etc. with your actual details. This
+                        is a template format only.</span>
+                </div>
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg> Words: <span class="stat-value" id="wordCount">0</span></div>
+                <div class="stat-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 7V4h16v3" />
+                        <path d="M9 20h6" />
+                        <path d="M12 4v16" />
+                    </svg> Chars: <span class="stat-value" id="charCount">0</span></div>
+                <div class="stat-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg> Read: <span class="stat-value" id="readTime">0 min</span></div>
+                <div class="stat-item">
+                    AI Confidence:
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidenceFill"></div>
+                    </div>
+                    <span class="stat-value" id="confidenceVal">—</span>
+                </div>
+            </div>
+
+            <!-- ENHANCEMENT TOOLS -->
+            <div class="glass-card">
+                <div class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                        <path d="M2 17l10 5 10-5" />
+                        <path d="M2 12l10 5 10-5" />
+                    </svg>
+                    AI Enhancements
+                </div>
+                <div class="enhance-toolbar" id="enhanceToolbar">
+                    <button class="enhance-btn" data-action="improve">✨ Improve Writing</button>
+                    <button class="enhance-btn" data-action="professional">🧠 More Professional</button>
+                    <button class="enhance-btn" data-action="persuasive">🎯 More Persuasive</button>
+                    <button class="enhance-btn" data-action="shorten">✂️ Shorten</button>
+                    <button class="enhance-btn" data-action="expand">📈 Expand</button>
+                    <button class="enhance-btn" data-action="tone">😊 Adjust Tone</button>
+                </div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="action-bar" id="actionBar">
+                <button class="action-btn" data-action="copy">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                    Copy
+                </button>
+                <button class="action-btn" data-action="download">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Download .txt
+                </button>
+                <button class="action-btn" data-action="undo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="1 4 1 10 7 10" />
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                    </svg>
+                    Undo
+                </button>
+                <button class="action-btn" data-action="redo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10" />
+                        <path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10" />
+                    </svg>
+                    Redo
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- HISTORY MODAL -->
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📧 Email History</h2>
+                <button class="icon-btn" id="closeModal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="historyList"></div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- REVIEW MODAL (uncancellable) -->
+    <div class="review-overlay" id="reviewOverlay">
+        <div class="review-modal">
+            <h2>⭐ How was your experience?</h2>
+            <p class="review-sub">Your feedback helps us improve. This will only take a moment.</p>
+            <div class="star-rating" id="starRating">
+                <button data-star="1">☆</button>
+                <button data-star="2">☆</button>
+                <button data-star="3">☆</button>
+                <button data-star="4">☆</button>
+                <button data-star="5">☆</button>
+            </div>
+            <div class="form-group">
+                <label for="reviewName">Your Name</label>
+                <input class="form-control" id="reviewName" type="text" placeholder="Enter your name...">
+            </div>
+            <div class="form-group">
+                <label for="reviewFeedback">Feedback</label>
+                <textarea class="form-control" id="reviewFeedback" placeholder="Tell us what you think..."></textarea>
+            </div>
+            <button class="btn-submit-review" id="submitReviewBtn">📨 Submit Review</button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT PLACEHOLDER -->
+    <script>
+        (function () {
+            'use strict';
+
+            /* ======== THEME MANAGER ======== */
+            const ThemeManager = {
+                init() {
+                    const saved = localStorage.getItem('email-composer-theme') || 'dark';
+                    document.documentElement.setAttribute('data-theme', saved);
+                    this.updateIcon(saved);
+                    document.getElementById('themeBtn').addEventListener('click', () => this.toggle());
+                },
+                toggle() {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('email-composer-theme', next);
+                    this.updateIcon(next);
+                    ToastSystem.show(next === 'dark' ? '🌙 Dark mode enabled' : '☀️ Light mode enabled', 'info');
+                },
+                updateIcon(theme) {
+                    const icon = document.getElementById('themeIcon');
+                    icon.innerHTML = theme === 'dark'
+                        ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+                        : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+                }
+            };
+
+            /* ======== TOAST SYSTEM ======== */
+            const ToastSystem = {
+                container: null,
+                init() { this.container = document.getElementById('toastContainer'); },
+                show(message, type = 'info', duration = 3000) {
+                    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+                    const toast = document.createElement('div');
+                    toast.className = 'toast';
+                    toast.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span><span>${message}</span>`;
+                    this.container.appendChild(toast);
+                    setTimeout(() => {
+                        toast.classList.add('removing');
+                        setTimeout(() => toast.remove(), 300);
+                    }, duration);
+                }
+            };
+
+            /* ======== UNDO/REDO STACK ======== */
+            const UndoRedoStack = {
+                undoStack: [], redoStack: [], maxSize: 30,
+                push(state) {
+                    this.undoStack.push(JSON.parse(JSON.stringify(state)));
+                    if (this.undoStack.length > this.maxSize) this.undoStack.shift();
+                    this.redoStack = [];
+                },
+                undo(currentState) {
+                    if (!this.undoStack.length) return null;
+                    this.redoStack.push(JSON.parse(JSON.stringify(currentState)));
+                    return this.undoStack.pop();
+                },
+                redo(currentState) {
+                    if (!this.redoStack.length) return null;
+                    this.undoStack.push(JSON.parse(JSON.stringify(currentState)));
+                    return this.redoStack.pop();
+                },
+                canUndo() { return this.undoStack.length > 0; },
+                canRedo() { return this.redoStack.length > 0; }
+            };
+
+            /* ======== STATS TRACKER ======== */
+            const StatsTracker = {
+                els: {},
+                init() {
+                    this.els = {
+                        wordCount: document.getElementById('wordCount'),
+                        charCount: document.getElementById('charCount'),
+                        readTime: document.getElementById('readTime'),
+                        confidenceFill: document.getElementById('confidenceFill'),
+                        confidenceVal: document.getElementById('confidenceVal')
+                    };
+                },
+                update(text) {
+                    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+                    const chars = text.length;
+                    const minutes = Math.max(1, Math.ceil(words / 200));
+                    this.els.wordCount.textContent = words;
+                    this.els.charCount.textContent = chars;
+                    this.els.readTime.textContent = words === 0 ? '0 min' : `${minutes} min`;
+                },
+                setConfidence(score) {
+                    this.els.confidenceFill.style.width = score + '%';
+                    this.els.confidenceVal.textContent = score + '%';
+                }
+            };
+
+            /* ======== HISTORY MANAGER ======== */
+            const HistoryManager = {
+                KEY: 'email-composer-history',
+                maxItems: 20,
+                getAll() {
+                    try { return JSON.parse(localStorage.getItem(this.KEY)) || []; }
+                    catch { return []; }
+                },
+                save(subject, body, prompt) {
+                    const history = this.getAll();
+                    history.unshift({
+                        id: Date.now(),
+                        subject,
+                        body: body.substring(0, 200),
+                        fullBody: body,
+                        prompt,
+                        date: new Date().toLocaleString()
+                    });
+                    if (history.length > this.maxItems) history.pop();
+                    localStorage.setItem(this.KEY, JSON.stringify(history));
+                },
+                renderList(container, onSelect) {
+                    const history = this.getAll();
+                    if (!history.length) {
+                        container.innerHTML = '<div class="history-empty">No emails generated yet.<br>Your history will appear here.</div>';
+                        return;
+                    }
+                    container.innerHTML = history.map(item => `
+      <div class="history-item" data-id="${item.id}">
+        <h4>${item.subject || 'Untitled'}</h4>
+        <p>${item.body}...</p>
+        <div class="history-meta">${item.date}</div>
+      </div>
+    `).join('');
+                    container.querySelectorAll('.history-item').forEach(el => {
+                        el.addEventListener('click', () => {
+                            const found = history.find(h => h.id === parseInt(el.dataset.id));
+                            if (found) onSelect(found);
+                        });
+                    });
+                }
+            };
+
+            /* ======== EMAIL GENERATOR (AI SIMULATION ENGINE) ======== */
+            const EmailGenerator = {
+                greetings: {
+                    professional: { client: 'Dear valued client,', manager: 'Dear [Manager],', hr: 'Dear HR Team,', team_member: 'Hi Team,', professor: 'Dear Professor,', custom: 'Dear Sir/Madam,' },
+                    friendly: { client: 'Hi there!', manager: 'Hey [Manager],', hr: 'Hello HR Team,', team_member: 'Hey everyone!', professor: 'Hi Professor,', custom: 'Hello!' },
+                    assertive: { client: 'Dear client,', manager: '[Manager],', hr: 'Attention HR Department,', team_member: 'Team,', professor: 'Professor,', custom: 'To Whom It May Concern,' },
+                    formal: { client: 'Respected Client,', manager: 'Respected [Manager],', hr: 'To the Human Resources Department,', team_member: 'Dear Colleagues,', professor: 'Respected Professor,', custom: 'Dear Sir or Madam,' },
+                    casual: { client: 'Hey!', manager: 'Hi!', hr: 'Hi HR,', team_member: 'Hey team!', professor: 'Hi Prof!', custom: 'Hi!' }
+                },
+
+                signatures: {
+                    professional: '\n\nBest regards,\n[Your Name]\n[Title] | [Company]\n[Phone] | [Email]',
+                    minimal: '\n\n— [Your Name]',
+                    friendly: '\n\nCheers,\n[Your Name] 😊',
+                    formal: '\n\nYours sincerely,\n[Your Name]\n[Title]\n[Department], [Company]',
+                    none: ''
+                },
+
+                subjects: {
+                    business_proposal: ['Strategic Partnership Opportunity', 'Proposal for Collaborative Growth', 'Business Opportunity — Let\'s Discuss', 'Innovative Solution Proposal for Your Consideration'],
+                    follow_up: ['Following Up on Our Recent Discussion', 'Quick Follow-Up — Next Steps', 'Circling Back on Our Conversation', 'Touching Base — Moving Forward Together'],
+                    apology: ['Our Sincere Apologies', 'Regarding the Recent Issue — Our Apology', 'We Want to Make This Right', 'An Honest Apology and Our Commitment to Improve'],
+                    complaint: ['Formal Complaint Regarding Service Quality', 'Urgent Attention Required — Service Issue', 'Request for Immediate Resolution', 'Dissatisfaction with Recent Experience'],
+                    job_application: ['Application for [Position] — Eager to Contribute', 'Experienced Professional Seeking Opportunity', 'Application Submission — [Position]', 'Passionate Candidate for Your Open Role'],
+                    meeting_request: ['Meeting Request — Aligning Our Goals', 'Can We Schedule a Quick Discussion?', 'Request for Meeting — Important Agenda', 'Let\'s Connect — Proposed Meeting'],
+                    custom: ['Reaching Out Regarding an Important Matter', 'A Note Worth Your Attention', 'Quick Note — Your Input Needed', 'Important Update for Your Review']
+                },
+
+                purposeIntros: {
+                    business_proposal: [
+                        'I am reaching out to present a strategic opportunity that I believe could be mutually beneficial for our organizations.',
+                        'After careful analysis of your company\'s recent achievements, I am confident that a collaboration between us could yield exceptional results.',
+                        'I would like to introduce a business proposal that aligns perfectly with your organization\'s growth trajectory.'
+                    ],
+                    follow_up: [
+                        'I wanted to follow up on our recent conversation and ensure we stay on track with the discussed action items.',
+                        'Thank you for taking the time to speak with me earlier. I\'m writing to recap our discussion and outline the proposed next steps.',
+                        'I hope this message finds you well. I\'m circling back to keep the momentum going on our recent exchange.'
+                    ],
+                    apology: [
+                        'I want to sincerely apologize for the inconvenience you have experienced. We take full responsibility for the situation.',
+                        'Please accept our heartfelt apologies for the recent issue. We understand the impact this has had and want to address it immediately.',
+                        'I am writing to express our deepest regret regarding the matter that was brought to our attention.'
+                    ],
+                    complaint: [
+                        'I am writing to formally address a concern that has significantly impacted my experience with your services.',
+                        'I wish to bring to your attention a serious matter that requires immediate resolution.',
+                        'Despite my previous positive experiences, a recent incident has compelled me to escalate this issue formally.'
+                    ],
+                    job_application: [
+                        'I am writing to express my strong interest in the available position. With my background in the field, I am excited about the opportunity to contribute to your team.',
+                        'Having followed your organization\'s impressive work, I am eager to bring my skills and passion to your team.',
+                        'I believe my experience and dedication make me an excellent candidate for the opportunity at your organization.'
+                    ],
+                    meeting_request: [
+                        'I would like to request a meeting to discuss a matter that I believe warrants our collaborative attention.',
+                        'There are several important topics I would like to explore with you, and I believe a focused discussion would be the most productive approach.',
+                        'I am reaching out to propose a meeting where we can align on key priorities and establish a clear path forward.'
+                    ],
+                    custom: [
+                        'I am reaching out regarding a matter that I believe deserves your thoughtful consideration.',
+                        'I wanted to take a moment to share something important with you.',
+                        'Thank you for your time. I have an update that I think you will find relevant and valuable.'
+                    ]
+                },
+
+                bodyParagraphs: {
+                    business_proposal: [
+                        'Our proposed solution addresses the key challenges your organization currently faces, particularly in operational efficiency and market expansion. We have developed a framework that leverages cutting-edge technology to deliver measurable results.',
+                        'Based on our research, the potential return on investment is projected to be significant within the first year. Our team has successfully implemented similar strategies for organizations in your sector.',
+                        'The partnership model we envision is built on transparency, shared objectives, and a commitment to excellence. We are prepared to customize our approach to align seamlessly with your existing workflows.',
+                        'We have prepared a detailed presentation that outlines the scope, timeline, and expected outcomes of this initiative. I would welcome the opportunity to walk you through the specifics at your convenience.',
+                        'Our track record speaks for itself, with a portfolio of satisfied partners who have seen tangible growth through our collaborative efforts.'
+                    ],
+                    follow_up: [
+                        'As discussed, the key action items include finalizing the project scope, establishing clear milestones, and assigning responsibilities to ensure smooth execution moving forward.',
+                        'I have taken the initiative to compile the relevant materials and documentation we referenced during our conversation. These are ready for your review at any time.',
+                        'Moving forward, I suggest we establish a regular check-in cadence to maintain alignment and address any emerging questions or adjustments that may be needed.',
+                        'I remain committed to delivering on the expectations we outlined and am available to discuss any modifications or additional requirements you may have.'
+                    ],
+                    apology: [
+                        'We have conducted a thorough review of the situation and identified the root cause of the issue. Immediate corrective measures have been implemented to prevent any recurrence.',
+                        'To demonstrate our commitment to making things right, we would like to offer a tangible gesture of goodwill. Your satisfaction remains our highest priority.',
+                        'We have reinforced our quality assurance processes and provided additional training to our team to ensure that every interaction meets the high standards you expect and deserve.',
+                        'We value your relationship deeply and understand that trust is earned through consistent actions, not just words. We are dedicated to regaining your full confidence.'
+                    ],
+                    complaint: [
+                        'The issue I experienced not only fell below the expected standard of service but also caused measurable disruption to my operations. I have documented the specifics for your reference.',
+                        'I have made multiple attempts to resolve this through standard channels, but unfortunately the responses received have been inadequate. This escalation is a necessary step.',
+                        'I expect a prompt and thorough investigation into this matter, along with a clear timeline for resolution. Transparency throughout this process is essential.',
+                        'I remain willing to work collaboratively toward a fair solution, but I must emphasize the urgency and seriousness of this situation.'
+                    ],
+                    job_application: [
+                        'Throughout my career, I have developed a robust skill set that directly aligns with the requirements of this role. My experience includes leading cross-functional initiatives and delivering results that exceed expectations.',
+                        'I am particularly drawn to your organization\'s commitment to innovation and its impact in the industry. The alignment between my professional values and your company culture is what motivates my application.',
+                        'In my previous roles, I have consistently demonstrated the ability to adapt to dynamic environments, solve complex problems, and drive meaningful outcomes for my teams and stakeholders.',
+                        'I am confident that my unique blend of technical expertise and interpersonal skills would make a valuable addition to your team. I am eager to discuss how I can contribute to your continued success.'
+                    ],
+                    meeting_request: [
+                        'The agenda for the proposed meeting would cover strategic alignment, resource allocation, and the timeline for our upcoming initiatives. I anticipate the discussion will be highly productive.',
+                        'I am flexible regarding scheduling and happy to accommodate your availability. A focused session of approximately 30–45 minutes should be sufficient to cover the key topics.',
+                        'To make the most of our time together, I will prepare a concise briefing document outlining the discussion points. This will allow us to dive directly into the substantive matters.',
+                        'I believe that a face-to-face (or virtual) conversation will be far more effective than email for the topics at hand. Your insights will be invaluable in shaping our approach.'
+                    ],
+                    custom: [
+                        'The details outlined below are critical and require careful consideration. I have taken the time to present the information in a clear and organized manner for your convenience.',
+                        'I believe that addressing this matter proactively will save us time and resources in the long run. Your perspective on this would be greatly appreciated.',
+                        'The implications of this topic extend beyond the immediate context and have the potential to influence our broader strategy. I look forward to exploring this further with you.',
+                        'I have gathered the relevant data and supporting materials to facilitate an informed discussion. Please feel free to reach out if you have any preliminary questions.'
+                    ]
+                },
+
+                ctaTemplates: {
+                    professional: (cta) => `\nI would appreciate the opportunity to discuss this further. ${cta || 'Please let me know your available times for a brief conversation.'}`,
+                    friendly: (cta) => `\nWould love to hear your thoughts! ${cta || 'Feel free to reach out anytime — I\'m just a message away.'}`,
+                    assertive: (cta) => `\n${cta || 'I expect a response at your earliest convenience. Time is of the essence here.'} Please confirm receipt of this communication.`,
+                    formal: (cta) => `\nI kindly request your prompt attention to this matter. ${cta || 'Your timely response would be most appreciated.'}`,
+                    casual: (cta) => `\n${cta || 'Let me know what you think — no rush, but sooner is better!'} Looking forward to hearing from you. 🙂`
+                },
+
+                _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; },
+                _paragraphCount(length) { return length === 'short' ? 1 : length === 'detailed' ? 4 : 2; },
+
+                generateEmail(prompt) {
+                    const { purpose, tone, recipient, length, keyPoints, cta, signatureStyle } = prompt;
+                    const subject = this._pick(this.subjects[purpose] || this.subjects.custom);
+                    const greeting = (this.greetings[tone] || this.greetings.professional)[recipient] || this.greetings.professional.custom;
+
+                    const intro = this._pick(this.purposeIntros[purpose] || this.purposeIntros.custom);
+                    const pool = this.bodyParagraphs[purpose] || this.bodyParagraphs.custom;
+                    const count = this._paragraphCount(length);
+                    const shuffled = [...pool].sort(() => 0.5 - Math.random());
+                    const paras = shuffled.slice(0, count);
+
+                    let keyPointsSection = '';
+                    if (keyPoints && keyPoints.trim()) {
+                        const points = keyPoints.split(/[,\n]+/).map(p => p.trim()).filter(Boolean);
+                        if (points.length) {
+                            keyPointsSection = '\n\nKey highlights I want to bring to your attention:\n' + points.map(p => `• ${p}`).join('\n');
+                        }
+                    }
+
+                    const ctaLine = (this.ctaTemplates[tone] || this.ctaTemplates.professional)(cta);
+                    const signature = this.signatures[signatureStyle] || this.signatures.professional;
+
+                    const body = `${greeting}\n\n${intro}\n\n${paras.join('\n\n')}${keyPointsSection}${ctaLine}${signature}`;
+                    const confidence = Math.floor(Math.random() * 15) + 82;
+                    return { subject, body, confidence };
+                }
+            };
+
+            /* ======== ENHANCEMENT ENGINE ======== */
+            const EnhancementEngine = {
+                transforms: {
+                    improve: {
+                        replacements: [
+                            [/\bgood\b/gi, 'excellent'], [/\bbad\b/gi, 'suboptimal'], [/\bnice\b/gi, 'exceptional'],
+                            [/\bthing\b/gi, 'aspect'], [/\bstuff\b/gi, 'material'], [/\bget\b/gi, 'obtain'],
+                            [/\bhelp\b/gi, 'assist'], [/\bbig\b/gi, 'significant'], [/\bshow\b/gi, 'demonstrate'],
+                            [/\btry\b/gi, 'endeavor'], [/\bneed\b/gi, 'require'], [/\buse\b/gi, 'utilize'],
+                            [/\bfix\b/gi, 'resolve'], [/\bmake\b/gi, 'establish'], [/\btalk\b/gi, 'discuss']
+                        ]
+                    },
+                    professional: {
+                        replacements: [
+                            [/\bHi\b/g, 'Dear'], [/\bHey\b/g, 'Dear'], [/\bThanks\b/gi, 'Thank you'],
+                            [/\bASAP\b/gi, 'at your earliest convenience'], [/\bFYI\b/gi, 'For your information'],
+                            [/\bwanna\b/gi, 'would like to'], [/\bgonna\b/gi, 'intend to'],
+                            [/\bcan't\b/gi, 'cannot'], [/\bwon't\b/gi, 'will not'], [/\bdon't\b/gi, 'do not'],
+                            [/\bI think\b/gi, 'I believe'], [/\bpretty sure\b/gi, 'confident that'],
+                            [/!+/g, '.'], [/\b😊\b/g, ''], [/\b🙂\b/g, '']
+                        ]
+                    },
+                    persuasive: {
+                        prefixes: [
+                            'I am confident that you will agree this is an outstanding opportunity. ',
+                            'The evidence clearly supports the value of moving forward together. ',
+                            'This is precisely the kind of initiative that drives transformational results. '
+                        ],
+                        suffixes: [
+                            '\n\nThe window of opportunity is now. I strongly encourage prompt action to capitalize on this momentum.',
+                            '\n\nOrganizations that have embraced this approach have seen remarkable outcomes. I am eager to help us achieve the same.',
+                            '\n\nI am fully committed to ensuring this delivers the exceptional results we both envision.'
+                        ]
+                    }
+                },
+
+                enhance(text, action) {
+                    if (!text.trim()) return text;
+                    switch (action) {
+                        case 'improve': return this._applyReplacements(text, this.transforms.improve.replacements);
+                        case 'professional': return this._applyReplacements(text, this.transforms.professional.replacements);
+                        case 'persuasive': {
+                            const t = this.transforms.persuasive;
+                            const prefix = t.prefixes[Math.floor(Math.random() * t.prefixes.length)];
+                            const suffix = t.suffixes[Math.floor(Math.random() * t.suffixes.length)];
+                            const lines = text.split('\n');
+                            if (lines.length > 2) lines.splice(2, 0, prefix);
+                            return lines.join('\n') + suffix;
+                        }
+                        case 'shorten': return this._shorten(text);
+                        case 'expand': return this._expand(text);
+                        case 'tone': return this._adjustTone(text);
+                        default: return text;
+                    }
+                },
+
+                _applyReplacements(text, rules) {
+                    let result = text;
+                    for (const [pattern, replacement] of rules) result = result.replace(pattern, replacement);
+                    return result;
+                },
+
+                _shorten(text) {
+                    const lines = text.split('\n').filter(l => l.trim());
+                    if (lines.length <= 3) return text;
+                    const keep = [lines[0]];
+                    const middle = lines.slice(1, -1);
+                    const step = Math.max(1, Math.floor(middle.length / 2));
+                    for (let i = 0; i < middle.length; i += step) keep.push(middle[i]);
+                    keep.push(lines[lines.length - 1]);
+                    return keep.join('\n\n');
+                },
+
+                _expand(text) {
+                    const expansions = [
+                        'To elaborate further on this point, it is worth noting that the broader context reinforces the importance of this initiative.',
+                        'Additionally, I want to emphasize that our approach has been carefully designed to address both immediate needs and long-term objectives.',
+                        'Furthermore, I believe it is important to highlight the collaborative nature of this endeavor, which ensures alignment across all stakeholders.',
+                        'It is also worth mentioning that the feedback we have received so far has been overwhelmingly positive, which validates our direction.'
+                    ];
+                    const lines = text.split('\n\n');
+                    const insert = Math.max(1, Math.floor(lines.length / 2));
+                    const expansion = expansions[Math.floor(Math.random() * expansions.length)];
+                    lines.splice(insert, 0, expansion);
+                    return lines.join('\n\n');
+                },
+
+                _adjustTone(text) {
+                    return text
+                        .replace(/\bimmediately\b/gi, 'at your convenience')
+                        .replace(/\bdemand\b/gi, 'kindly request')
+                        .replace(/\bmust\b/gi, 'would appreciate if you could')
+                        .replace(/\burgent\b/gi, 'timely')
+                        .replace(/\bfailure\b/gi, 'challenge')
+                        .replace(/\bproblem\b/gi, 'opportunity for improvement');
+                }
+            };
+
+            /* ======== AI SERVICE (Backend Proxy) ======== */
+            const AIService = {
+                BASE_URL: window.location.origin,
+                conversationHistory: [],
+
+                _buildEmailPrompt(prompt) {
+                    const { purpose, tone, recipient, length, keyPoints, cta, signatureStyle } = prompt;
+                    return `You are an expert email composer. Write a professional email with the following parameters:
+- Purpose: ${purpose.replace(/_/g, ' ')}
+- Tone: ${tone}
+- Recipient type: ${recipient.replace(/_/g, ' ')}
+- Length: ${length} (${length === 'short' ? '1-2 paragraphs' : length === 'detailed' ? '4-5 paragraphs' : '2-3 paragraphs'})
+- Key points: ${keyPoints || 'None specified'}
+- Call to action: ${cta || 'None specified'}
+- Signature style: ${signatureStyle}
+
+Respond with ONLY the email in this exact format (no markdown, no extra text):
+SUBJECT: <subject line>
+---
+<email body including greeting, paragraphs, CTA line, and signature>`;
+                },
+
+                _buildEnhancePrompt(text, action) {
+                    const instructions = {
+                        improve: 'Improve the writing quality of this email. Use better vocabulary, smoother transitions, and stronger sentence structure. Keep the same meaning and length.',
+                        professional: 'Make this email more professional and formal. Remove casual language, use business-appropriate phrasing, and ensure a polished tone throughout.',
+                        persuasive: 'Make this email more persuasive and compelling. Add stronger calls to action, use persuasive language, and create urgency where appropriate.',
+                        shorten: 'Shorten this email significantly while preserving the key message and call to action. Be concise and remove redundant content.',
+                        expand: 'Expand this email with more detail, supporting points, and elaboration. Make it more comprehensive while maintaining the same tone.',
+                        tone: 'Adjust the tone of this email to be warmer, more approachable, and diplomatically friendly while remaining professional.'
+                    };
+                    return `${instructions[action] || 'Improve this email.'}
+
+Respond with ONLY the rewritten email body (no subject line, no extra commentary, no markdown formatting):
+
+${text}`;
+                },
+
+                async _callBackend(endpoint, messages) {
+                    const response = await fetch(`${this.BASE_URL}${endpoint}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages })
+                    });
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.error || `Server error: ${response.status}`);
+                    }
+                    const result = await response.json();
+                    return result.choices[0].message;
+                },
+
+                async generateEmail(prompt) {
+                    const userContent = this._buildEmailPrompt(prompt);
+                    this.conversationHistory = [{ role: 'user', content: userContent }];
+
+                    const assistantMsg = await this._callBackend('/api/generate', this.conversationHistory);
+
+                    this.conversationHistory.push({
+                        role: 'assistant',
+                        content: assistantMsg.content,
+                        reasoning_details: assistantMsg.reasoning_details
+                    });
+
+                    const raw = assistantMsg.content || '';
+                    let subject = '', body = '';
+                    const subjectMatch = raw.match(/^SUBJECT:\s*(.+)/im);
+                    if (subjectMatch) {
+                        subject = subjectMatch[1].trim();
+                        const dividerIdx = raw.indexOf('---');
+                        body = dividerIdx !== -1 ? raw.substring(dividerIdx + 3).trim() : raw.substring(subjectMatch[0].length).trim();
+                    } else {
+                        const lines = raw.split('\n').filter(l => l.trim());
+                        subject = lines[0] || 'Generated Email';
+                        body = lines.slice(1).join('\n').trim() || raw;
+                    }
+                    return { subject, body, confidence: Math.floor(Math.random() * 10) + 88 };
+                },
+
+                async enhanceEmail(text, action) {
+                    const userContent = this._buildEnhancePrompt(text, action);
+                    this.conversationHistory.push({ role: 'user', content: userContent });
+
+                    const assistantMsg = await this._callBackend('/api/enhance', this.conversationHistory);
+
+                    this.conversationHistory.push({
+                        role: 'assistant',
+                        content: assistantMsg.content,
+                        reasoning_details: assistantMsg.reasoning_details
+                    });
+                    return assistantMsg.content || text;
+                }
+            };
+
+            /* ======== TYPING ANIMATOR ======== */
+            const TypingAnimator = {
+                _timer: null,
+                _resolve: null,
+                cancel() {
+                    if (this._timer) { clearTimeout(this._timer); this._timer = null; }
+                    if (this._resolve) { this._resolve(); this._resolve = null; }
+                },
+                async animate(element, text, speed = 8) {
+                    this.cancel();
+                    element.textContent = '';
+                    let i = 0;
+                    return new Promise(resolve => {
+                        this._resolve = resolve;
+                        const type = () => {
+                            if (i < text.length) {
+                                const chunk = text.substring(i, i + 3);
+                                element.textContent += chunk;
+                                i += 3;
+                                StatsTracker.update(element.textContent);
+                                this._timer = setTimeout(type, speed);
+                            } else {
+                                this._timer = null;
+                                this._resolve = null;
+                                resolve();
+                            }
+                        };
+                        type();
+                    });
+                }
+            };
+
+            /* ======== UI CONTROLLER ======== */
+            const UIController = {
+                els: {},
+                state: { tone: 'professional', length: 'medium', generating: false },
+
+                init() {
+                    this.els = {
+                        generateBtn: document.getElementById('generateBtn'),
+                        emailBody: document.getElementById('emailBody'),
+                        subjectInput: document.getElementById('subjectInput'),
+                        purpose: document.getElementById('emailPurpose'),
+                        recipient: document.getElementById('recipientType'),
+                        keyPoints: document.getElementById('keyPoints'),
+                        ctaInput: document.getElementById('ctaInput'),
+                        signatureStyle: document.getElementById('signatureStyle'),
+                        enhanceToolbar: document.getElementById('enhanceToolbar'),
+                        actionBar: document.getElementById('actionBar'),
+                        historyBtn: document.getElementById('historyBtn'),
+                        historyModal: document.getElementById('historyModal'),
+                        closeModal: document.getElementById('closeModal'),
+                        historyList: document.getElementById('historyList')
+                    };
+                    this._bindEvents();
+                },
+
+                _bindEvents() {
+                    // Pill groups (event delegation)
+                    document.querySelectorAll('.pill-group').forEach(group => {
+                        group.addEventListener('click', (e) => {
+                            const pill = e.target.closest('.pill');
+                            if (!pill) return;
+                            this._addRipple(e, pill);
+                            group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+                            pill.classList.add('active');
+                            const field = group.dataset.field;
+                            this.state[field] = pill.dataset.value;
+                        });
+                    });
+
+                    // Generate
+                    this.els.generateBtn.addEventListener('click', (e) => {
+                        this._addRipple(e, this.els.generateBtn);
+                        this._generate();
+                    });
+
+                    // Enhancement toolbar (event delegation)
+                    this.els.enhanceToolbar.addEventListener('click', (e) => {
+                        const btn = e.target.closest('.enhance-btn');
+                        if (!btn) return;
+                        this._addRipple(e, btn);
+                        this._enhance(btn.dataset.action);
+                    });
+
+                    // Action bar (event delegation)
+                    this.els.actionBar.addEventListener('click', (e) => {
+                        const btn = e.target.closest('.action-btn');
+                        if (!btn) return;
+                        this._addRipple(e, btn);
+                        this._handleAction(btn.dataset.action);
+                    });
+
+                    // Stats update on edit
+                    this.els.emailBody.addEventListener('input', () => {
+                        StatsTracker.update(this.els.emailBody.innerText);
+                    });
+
+                    // History modal
+                    this.els.historyBtn.addEventListener('click', () => this._openHistory());
+                    this.els.closeModal.addEventListener('click', () => this._closeHistory());
+                    this.els.historyModal.addEventListener('click', (e) => {
+                        if (e.target === this.els.historyModal) this._closeHistory();
+                    });
+
+                    // Keyboard shortcuts
+                    document.addEventListener('keydown', (e) => {
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                            e.preventDefault();
+                            if (e.shiftKey) this._handleAction('redo');
+                            else this._handleAction('undo');
+                        }
+                    });
+                },
+
+                _addRipple(e, el) {
+                    const ripple = document.createElement('span');
+                    ripple.className = 'ripple';
+                    const rect = el.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+                    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+                    el.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                },
+
+                _getPrompt() {
+                    return {
+                        purpose: this.els.purpose.value,
+                        tone: this.state.tone,
+                        recipient: this.els.recipient.value,
+                        length: this.state.length,
+                        keyPoints: this.els.keyPoints.value,
+                        cta: this.els.ctaInput.value,
+                        signatureStyle: this.els.signatureStyle.value
+                    };
+                },
+
+                async _generate() {
+                    if (this.state.generating) return;
+                    this.state.generating = true;
+                    this.els.generateBtn.classList.add('loading');
+
+                    // Save current state for undo
+                    UndoRedoStack.push({
+                        subject: this.els.subjectInput.value,
+                        body: this.els.emailBody.innerText
+                    });
+
+                    const prompt = this._getPrompt();
+                    let result;
+
+                    try {
+                        // Try real AI API first
+                        ToastSystem.show('🧠 Generating with AI (reasoning enabled)...', 'info');
+                        result = await AIService.generateEmail(prompt);
+                    } catch (err) {
+                        console.warn('AI API failed, using local engine:', err);
+                        ToastSystem.show('⚡ API unavailable — using local engine', 'warning');
+                        await new Promise(r => setTimeout(r, 400));
+                        result = EmailGenerator.generateEmail(prompt);
+                    }
+
+                    this.els.subjectInput.value = result.subject;
+                    this.els.subjectInput.style.opacity = '0';
+                    setTimeout(() => { this.els.subjectInput.style.opacity = '1'; }, 50);
+
+                    await TypingAnimator.animate(this.els.emailBody, result.body, 6);
+
+                    StatsTracker.setConfidence(result.confidence);
+
+                    // Save to history
+                    HistoryManager.save(result.subject, result.body, prompt);
+
+                    this.els.generateBtn.classList.remove('loading');
+                    this.state.generating = false;
+                    ToastSystem.show('✅ Email generated successfully!', 'success');
+
+                    // Show review form after first generation (once only)
+                    ReviewManager.show();
+                },
+
+                async _enhance(action) {
+                    const text = this.els.emailBody.innerText;
+                    if (!text.trim()) {
+                        ToastSystem.show('Generate an email first', 'warning');
+                        return;
+                    }
+                    UndoRedoStack.push({
+                        subject: this.els.subjectInput.value,
+                        body: text
+                    });
+
+                    const labels = {
+                        improve: 'Improving writing', professional: 'Making more professional',
+                        persuasive: 'Making more persuasive', shorten: 'Shortening email',
+                        expand: 'Expanding email', tone: 'Adjusting tone'
+                    };
+                    let enhanced;
+                    try {
+                        ToastSystem.show(`🧠 ${labels[action] || 'Enhancing'} with AI...`, 'info');
+                        enhanced = await AIService.enhanceEmail(text, action);
+                    } catch (err) {
+                        console.warn('AI enhance failed, using local engine:', err);
+                        ToastSystem.show('⚡ API unavailable — using local engine', 'warning');
+                        enhanced = EnhancementEngine.enhance(text, action);
+                    }
+
+                    this.els.emailBody.textContent = enhanced;
+                    StatsTracker.update(enhanced);
+                    const doneLabels = {
+                        improve: 'Writing improved', professional: 'Made more professional',
+                        persuasive: 'Made more persuasive', shorten: 'Email shortened',
+                        expand: 'Email expanded', tone: 'Tone adjusted'
+                    };
+                    ToastSystem.show(`✨ ${doneLabels[action] || 'Enhanced'}`, 'success');
+                },
+
+                _handleAction(action) {
+                    switch (action) {
+                        case 'copy': {
+                            const text = `Subject: ${this.els.subjectInput.value}\n\n${this.els.emailBody.innerText}`;
+                            navigator.clipboard.writeText(text).then(() => {
+                                ToastSystem.show('Copied to clipboard!', 'success');
+                            }).catch(() => ToastSystem.show('Failed to copy', 'error'));
+                            break;
+                        }
+                        case 'download': {
+                            const text = `Subject: ${this.els.subjectInput.value}\n\n${this.els.emailBody.innerText}`;
+                            if (!text.trim() || text.trim() === 'Subject:') {
+                                ToastSystem.show('Nothing to download', 'warning');
+                                return;
+                            }
+                            const blob = new Blob([text], { type: 'text/plain' });
+                            const a = document.createElement('a');
+                            a.href = URL.createObjectURL(blob);
+                            a.download = 'email_' + Date.now() + '.txt';
+                            a.click();
+                            URL.revokeObjectURL(a.href);
+                            ToastSystem.show('Downloaded as .txt', 'success');
+                            break;
+                        }
+                        case 'undo': {
+                            const state = UndoRedoStack.undo({
+                                subject: this.els.subjectInput.value,
+                                body: this.els.emailBody.innerText
+                            });
+                            if (state) {
+                                this.els.subjectInput.value = state.subject;
+                                this.els.emailBody.textContent = state.body;
+                                StatsTracker.update(state.body);
+                                ToastSystem.show('Undo applied', 'info');
+                            } else {
+                                ToastSystem.show('Nothing to undo', 'warning');
+                            }
+                            break;
+                        }
+                        case 'redo': {
+                            const state = UndoRedoStack.redo({
+                                subject: this.els.subjectInput.value,
+                                body: this.els.emailBody.innerText
+                            });
+                            if (state) {
+                                this.els.subjectInput.value = state.subject;
+                                this.els.emailBody.textContent = state.body;
+                                StatsTracker.update(state.body);
+                                ToastSystem.show('Redo applied', 'info');
+                            } else {
+                                ToastSystem.show('Nothing to redo', 'warning');
+                            }
+                            break;
+                        }
+                    }
+                },
+
+                _openHistory() {
+                    HistoryManager.renderList(this.els.historyList, (item) => {
+                        this.els.subjectInput.value = item.subject;
+                        this.els.emailBody.textContent = item.fullBody;
+                        StatsTracker.update(item.fullBody);
+                        this._closeHistory();
+                        ToastSystem.show('Email restored from history', 'info');
+                    });
+                    this.els.historyModal.classList.add('active');
+                },
+
+                _closeHistory() {
+                    this.els.historyModal.classList.remove('active');
+                }
+            };
+
+            /* ======== REVIEW MANAGER ======== */
+            const ReviewManager = {
+                STORAGE_KEY: 'email-composer-reviewed',
+                overlay: null,
+                selectedRating: 0,
+
+                init() {
+                    this.overlay = document.getElementById('reviewOverlay');
+                    const starRating = document.getElementById('starRating');
+                    const submitBtn = document.getElementById('submitReviewBtn');
+
+                    // Star selection
+                    starRating.addEventListener('click', (e) => {
+                        const btn = e.target.closest('button[data-star]');
+                        if (!btn) return;
+                        this.selectedRating = parseInt(btn.dataset.star);
+                        starRating.querySelectorAll('button').forEach((b, i) => {
+                            b.textContent = i < this.selectedRating ? '★' : '☆';
+                            b.classList.toggle('active', i < this.selectedRating);
+                        });
+                    });
+
+                    // Submit
+                    submitBtn.addEventListener('click', () => this._submit());
+
+                    // Block Escape key when review is open
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && this.overlay.classList.contains('active')) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                    }, true);
+                },
+
+                shouldShow() {
+                    return !localStorage.getItem(this.STORAGE_KEY);
+                },
+
+                show() {
+                    if (!this.shouldShow()) return;
+                    this.overlay.classList.add('active');
+                },
+
+                async _submit() {
+                    const name = document.getElementById('reviewName').value.trim();
+                    const feedback = document.getElementById('reviewFeedback').value.trim();
+                    const rating = this.selectedRating || 5;
+
+                    const submitBtn = document.getElementById('submitReviewBtn');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Submitting...';
+
+                    try {
+                        await fetch(`${AIService.BASE_URL}/api/reviews`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name: name || 'Anonymous', rating, feedback })
+                        });
+                        ToastSystem.show('Thank you for your feedback! ❤️', 'success');
+                    } catch (err) {
+                        // Save locally if backend is down
+                        const localReviews = JSON.parse(localStorage.getItem('email-composer-pending-reviews') || '[]');
+                        localReviews.push({ name: name || 'Anonymous', rating, feedback, timestamp: new Date().toISOString() });
+                        localStorage.setItem('email-composer-pending-reviews', JSON.stringify(localReviews));
+                        ToastSystem.show('Review saved locally. Thanks! ❤️', 'success');
+                    }
+
+                    localStorage.setItem(this.STORAGE_KEY, 'true');
+                    this.overlay.classList.remove('active');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '📨 Submit Review';
+                }
+            };
+
+            /* ======== INIT ======== */
+            document.addEventListener('DOMContentLoaded', () => {
+                // Splash screen auto-dismiss
+                const splash = document.getElementById('splashScreen');
+                setTimeout(() => { splash.classList.add('hidden'); }, 2500);
+                setTimeout(() => { splash.remove(); }, 3100);
+
+                ToastSystem.init();
+                ThemeManager.init();
+                StatsTracker.init();
+                ReviewManager.init();
+                UIController.init();
+            });
+
+        })();
+    </script>
+</body>
+
+</html>
